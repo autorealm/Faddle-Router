@@ -114,7 +114,7 @@ class Router {
 	 * @param string|array $method 请求方法
 	 * @return Router
 	 */
-	public function route(string $pattern, $callback, $method=null) {
+	public function route($pattern, $callback, $method=null) {
 		if (! is_string($pattern)) return $this;
 		$pattern = str_replace(array('//', '(', ')'), array('/', '\(', '\)'), $pattern); //替换正则字符
 		foreach (static::$match_types as $to => $from) {
@@ -146,7 +146,7 @@ class Router {
 	 * @param string $pattern
 	 * @param Router $router
 	 */
-	public function group($pattern, Router $router=self) {
+	public function group($pattern, Router $router) {
 		if ($router instanceof Router) {
 			$this->blueprints[$pattern] = $router;
 		}
@@ -159,7 +159,7 @@ class Router {
 	 */
 	public function execute($app=null) {
 		if ($app) self::$app = $app;
-		if (! self::$app instanceof Faddle\Faddle) {
+		if (! self::$app instanceof \Faddle\Faddle) {
 			trigger_error(sprintf('应用类型错误：%s', gettype($app)), E_USER_WARNING);
 			//self::$app = App::instance();
 		}
@@ -251,7 +251,7 @@ class Router {
 		foreach ($this->middlewares as $k => $mw) {
 			if ($mw == null) continue;
 			if (! is_int($k)) {
-				if ($k !== $this->matched_name || ! preg_match($k, $data['path']) {
+				if (($k !== $this->matched_name) || (! preg_match($k, $data['path']))) {
 					continue;
 				}
 			}
@@ -338,7 +338,7 @@ class Router {
 	 * @param string $domain Set Domain
 	 * @return array|boolean arguments
 	 */
-	private function checkdomain($domain) {
+	private function checkdomain($domain=null) {
 		if (!isset($domain)) $domain = $this->domain;
 		if (!empty($domain)) {
 			$server = $_SERVER["SERVER_NAME"];
@@ -356,7 +356,7 @@ class Router {
 	 * @param string $middleware
 	 * @return mixed
 	 */
-	public function middleware($middleware) {
+	public function middleware($middleware=null) {
 		if (isset($middleware) and ! in_array($middleware, $this->middlewares)) {
 			$this->middlewares[] = $middleware;
 			//array_unshift($this->middlewares, $middleware);
@@ -473,7 +473,7 @@ class Router {
 	
 	public static function present($content) {
 		//通知应用将要回应的文本内容。
-		if (self::$app != null) self::$app->onPresent($result); 
+		if (self::$app != null) self::$app->onPresent($content); 
 	}
 	
 	public static function before_route($who) {

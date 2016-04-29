@@ -1,5 +1,8 @@
 <?php
 
+ini_set('display_errors', 'On');
+error_reporting(E_ALL);
+
 define('FADDLE_PATH', dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR. 'src');
 require FADDLE_PATH . '/Faddle/autoload.php';
 
@@ -22,8 +25,13 @@ class App extends Faddle\Faddle {
 					//
 				});
 		}
-		$this->router = new Router();
-		
+        $projname = basename(dirname(__DIR__));
+        $this->router = new Router('/' . $projname . '/test');
+        $this->on('present', function($content) {
+           ob_start() and ob_clean();
+            echo $content;
+            ob_end_flush();
+		});
 	}
 	
 	public function __destruct() {
@@ -51,7 +59,7 @@ class App extends Faddle\Faddle {
 		$this->event->on($event, $callback);
 	}
 	
-	public function emit($event, $args) {
+	public function emit($event, $args=null) {
 		$this->event->trigger($event, $args);
 	}
 	
@@ -63,10 +71,10 @@ class App extends Faddle\Faddle {
 }
 
 $app = new App();
-$route = Route::generate(['GET'], '/{name}/{:str}', function($name, $value) {
+$route = Route::generate(['GET'], '/{name}/{:str}', function($name, $value, $item) {
 				
-				return "Name:" . $name . "\r\n" . "Value:" . $value;
-			})->params(array('name'=>'item'));
+				return "Name:" . $name . "\r\n" . "Value:" . $value . "\r\n" . "Item:" . $item;;
+			})->params(array('item'=>'item'));
 
 $app->router->get('/', function($args) {
     return "Welcome to Faddle!";
@@ -78,5 +86,15 @@ $app->router->get('/hello/{:value}', function($args) {
 
 $app->router->set($route);
 
-$app->run();
+$api_router = new Router();
+$api_router->route('/', function() {
+	echo 'welcome to api system!';
+});
+$api_router->route('/user/{:int}', function($id) {
+	echo 'User : ' . $id;
+});
+
+$app->router->group('/api', $api_router);
+
+$app();
 

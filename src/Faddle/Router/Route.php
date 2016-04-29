@@ -91,7 +91,7 @@ class Route {
 	/**
 	 * 路由构造函数
 	 */
-	public function __construct(string $pattern, array $config) {
+	public function __construct($pattern, array $config) {
 		$this->pattern = (string)$pattern;
 		$this->method = isset($config['method']) ? (array)$config['method'] : array('GET', 'POST');
 		$this->name = isset($config['as']) ? (string)$config['as'] : null;
@@ -154,7 +154,7 @@ class Route {
 			return false;
 	}
 
-	public function __call($method, $args) {
+	public function __call($method, $args=array()) {
 		if (preg_match('/^get[A-Z_]{1}.+/', $method)) {
 			$prop_name = lcfirst(substr($method, 3));
 			return $this->$prop_name;
@@ -179,7 +179,7 @@ class Route {
 		return $this;
 	}
 
-	public function uses(string $namespace) {
+	public function uses($namespace=null) {
 		if (isset($namespace)) {
 			$this->uses = (string)$namespace;
 			return $this;
@@ -187,7 +187,7 @@ class Route {
 		return $this->uses;
 	}
 
-	public function name(string $name) {
+	public function name($name=null) {
 		if (isset($name)) {
 			$this->name = (string)$name;
 			return $this;
@@ -195,7 +195,7 @@ class Route {
 		return $this->name;
 	}
 
-	public function middlewares($middlewares) {
+	public function middlewares($middlewares=null) {
 		if (isset($middlewares)) {
 			$this->middlewares = (array)$middlewares;
 			return $this;
@@ -203,7 +203,7 @@ class Route {
 		return $this->middlewares;
 	}
 
-	public function pattern(string $pattern) {
+	public function pattern($pattern=null) {
 		if (isset($pattern)) {
 			//$pattern = strtr($pattern, self::$match_types);
 			$this->pattern = (string)$pattern;
@@ -212,7 +212,7 @@ class Route {
 		return $this->pattern;
 	}
 
-	public function params(string $params) {
+	public function params($params=null) {
 		if (isset($params)) {
 			$this->params = (array)$params;
 			return $this;
@@ -220,7 +220,7 @@ class Route {
 		return $this->params;
 	}
 
-	public function filters(array $filters) {
+	public function filters(array $filters=null) {
 		if (isset($filters)) {
 			$this->filters = (array)$filters;
 			return $this;
@@ -228,7 +228,7 @@ class Route {
 		return $this->filters;
 	}
 
-	public function callback($callback) {
+	public function callback($callback=null) {
 		if (isset($callback)) {
 			if (is_callable($callback)) {
 				$this->callback = $callback;
@@ -313,7 +313,7 @@ class Route {
 		
 		return '' . preg_replace_callback("@\{(?:([^:\}]+)|)(?::([\w-%]+)|)?\}@", function($matchs) use($match_types) {
 			$name = $matchs[1];
-			$type = $matchs[2];
+			$type = count($matchs) > 2 ? $matchs[2] : null;
 			$pattern = "[^/\?#]+";
 			
 			if (!empty($type)) {
@@ -322,7 +322,7 @@ class Route {
 					$pattern = $match_types[$type];
 				}
 			}
-			if ($name[strlen($name) - 1] == '?') {
+			if (strlen($name) > 0 and $name[strlen($name) - 1] == '?') {
 				$name = substr($name, 0, strlen($name) - 1);
 				$end = '?';
 			} else {

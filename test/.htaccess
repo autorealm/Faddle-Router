@@ -1,0 +1,27 @@
+# 服务器规则
+
+<IfModule mod_rewrite.c>
+    RewriteEngine on
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{QUERY_STRING} ^(.*)$
+    RewriteRule !.(js|css|ico|gif|jpg|png|txt|woff|ttf|svg|xml)$ index.php?%1 [L,QSA]
+    
+</IfModule>
+
+# set magic_quotes_gpc as f3 wouldn't start otherwise
+<IfModule mod_php5.c>
+    php_value magic_quotes_gpc "1"
+</IfModule>
+
+# deny requests for config files
+<FilesMatch ".(ini)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Disable ETags
+<IfModule mod_headers.c>
+    Header Unset ETag
+    FileETag none
+</IfModule>
